@@ -1,0 +1,169 @@
+#include <stdio.h>
+#include <conio.h>
+#include <string.h>
+
+//
+struct address {
+	char name[30];
+	char age[5];
+	char phone[15];
+};
+
+void print_menu();
+void view_juso();
+void add_juso();
+void delete_juso();
+
+//
+const char* fname = "C:\\temp\\juso.txt";
+
+int main()
+{
+	char select = 0;
+	puts("\n###  세희의 친구 연락처 ###\n");
+
+	while (select != 4)
+	{
+		print_menu();
+		select = _getch();
+
+		switch (select)
+		{
+		case '1': view_juso();
+			break;
+		case '2': add_juso();
+			break;
+		case '3': delete_juso();
+			break;
+		case '4': return 0;
+			break;
+		default: printf("\n 잘못 입력했어요. 다시 선택하세요.\n");
+		}
+	}
+
+	return 0;
+}
+
+//
+void print_menu()
+{
+	printf("\n");
+	printf("1. 연락처 출력 \n");
+	printf("2. 연락처 등록 \n");
+	printf("3. 연락처 삭제 \n");
+	printf("4. 끝내기 \n");
+}
+
+//
+void view_juso()
+{
+	char str[200] = "";
+	FILE* rfp, * wfp;
+	int i;
+
+	fopen_s(&rfp, fname, "r");
+
+	//
+	if (rfp == NULL)
+	{
+		fopen_s(&wfp, fname, "w");
+		fclose(wfp);
+		fopen_s(&rfp, fname, "r");
+	}
+
+	//
+	for (i = 1;; i++)
+	{
+		fgets(str, 200, rfp);
+
+		if (feof(rfp))
+			break;
+
+		printf("%2d: %s", i, str);
+	}
+
+	//
+	if (i == 1)
+		puts("\n ** 연락처 파일에 전화번호가 하나도 없어요. **\n");
+
+	fclose(rfp);
+}
+
+//
+void add_juso()
+{
+	struct address adr = { "","","" };
+	char wstr[200] = "";
+	FILE* wfp;
+
+	fopen_s(&wfp, fname, "a");
+
+	printf("이름 입력 ==>");
+	gets_s(adr.name, 30);
+	printf("나이 입력 ==>");
+	gets_s(adr.age, 5);
+	printf("전화번호 입력 ==>");
+	gets_s(adr.phone, 15);
+
+	//
+	strcat_s(wstr, 200, adr.name);
+	strcat_s(wstr, 200, "\t");
+	strcat_s(wstr, 200, adr.age);
+	strcat_s(wstr, 200, "\t");
+	strcat_s(wstr, 200, adr.phone);
+	strcat_s(wstr, 200, "\n");
+
+	fputs(wstr, wfp);
+
+	fclose(wfp);
+}
+
+//
+void delete_juso()
+{
+	//
+	char read_str[50][200] = { "", };//
+
+	char str[200] = "";
+	FILE* rfp, * wfp;
+	int del_line, i, count = 0;
+
+	fopen_s(&rfp, fname, "r");
+
+	//
+	if (rfp == NULL)
+	{
+		puts("\n!! 연락처 파일이 없습니다. !!\n");
+		return;
+	}
+
+	printf("\n삭제할 행 번호는?");
+	scanf_s("%d", &del_line);
+
+	for (i = 0; i < 50; i++)//
+	{
+		strcpy_s(str, 200, "");
+		fgets(str, 200, rfp);
+
+		if (i + 1 != del_line)
+		{
+			strcpy_s(read_str[i], 200, str);
+			count++;
+		}
+		else
+			printf("%d 행이 삭제되었습니다.\n", del_line);
+
+		if (feof(rfp))
+			break;
+	}
+
+	fclose(rfp);
+
+	//
+	fopen_s(&wfp, fname, "w");
+
+	for (i = 0; i < count; i++)
+		fputs(read_str[i], wfp);
+
+	fclose(wfp);
+}
